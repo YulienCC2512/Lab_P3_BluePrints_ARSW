@@ -3,7 +3,7 @@ import api from '../../services/apiClient.js'
 
 export const fetchAuthors = createAsyncThunk('blueprints/fetchAuthors', async () => {
   const { data } = await api.get('/blueprints')
-  // Expecting API returns array of {author, name, points}
+  // Se espera que la API devuelva un array de objetos { author, name, points }
   const authors = [...new Set(data.map((bp) => bp.author))]
   return authors
 })
