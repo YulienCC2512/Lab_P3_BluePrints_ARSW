@@ -2,16 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchAuthors, fetchByAuthor, fetchBlueprint } from '../features/blueprints/blueprintsSlice.js'
-import { selectTopBlueprints } from '../features/blueprints/blueprintsSelectors.js'
+import {
+  fetchAuthors,
+  fetchByAuthor,
+  fetchBlueprint,
+} from '../features/blueprints/blueprintsSlice.js'
 import BlueprintCanvas from '../components/BlueprintCanvas.jsx'
 import { deleteBlueprint } from '../features/blueprints/blueprintsSlice.js'
 
 export default function BlueprintsPage() {
   const dispatch = useDispatch()
-  const { byAuthor, current, status, error } = useSelector((s) => s.blueprints)
-  const topBlueprints = useSelector(selectTopBlueprints)
-
+  const { byAuthor, current, status } = useSelector((s) => s.blueprints)
   const [authorInput, setAuthorInput] = useState('')
   const [selectedAuthor, setSelectedAuthor] = useState('')
   const items = byAuthor[selectedAuthor] || []
@@ -22,7 +23,7 @@ export default function BlueprintsPage() {
 
   const totalPoints = useMemo(
     () => items.reduce((acc, bp) => acc + (bp.points?.length || 0), 0),
-    [items]
+    [items],
   )
 
   const getBlueprints = () => {
@@ -72,54 +73,62 @@ export default function BlueprintsPage() {
             </div>
           </div>
 
-          <div
-            className="card text-light"
-            style={{ backgroundColor: '#0b1220', border: '1px solid #334155' }}
-          >
-            <div className="card-body">
-              <h3 className="card-title" style={{ color: '#93c5fd' }}>
-                {selectedAuthor ? `${selectedAuthor}'s blueprints:` : 'Results'}
-              </h3>
-
-              {status === 'loading' && <p>Cargando...</p>}
-              {!items.length && status !== 'loading' && <p>Sin resultados.</p>}
-
-              {!!items.length && (
-                <div className="table-responsive">
-                  <table className="table table-sm table-borderless align-middle text-light">
-                    <thead style={{ borderBottom: '1px solid #334155' }}>
-                    <tr style={{ color: '#93c5fd' }}>
-                      <th>Blueprint name</th>
-                      <th className="text-end">Number of points</th>
-                      <th></th>
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>
+            {selectedAuthor ? `${selectedAuthor}'s blueprints:` : 'Results'}
+          </h3>
+          {status === 'loading' && <p>Cargando...</p>}
+          {!items.length && status !== 'loading' && <p>Sin resultados.</p>}
+          {!!items.length && (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th
+                      style={{
+                        textAlign: 'left',
+                        padding: '8px',
+                        borderBottom: '1px solid #334155',
+                      }}
+                    >
+                      Blueprint name
+                    </th>
+                    <th
+                      style={{
+                        textAlign: 'right',
+                        padding: '8px',
+                        borderBottom: '1px solid #334155',
+                      }}
+                    >
+                      Number of points
+                    </th>
+                    <th style={{ padding: '8px', borderBottom: '1px solid #334155' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((bp) => (
+                    <tr key={bp.name}>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #1f2937' }}>
+                        {bp.name}
+                      </td>
+                      <td
+                        style={{
+                          padding: '8px',
+                          textAlign: 'right',
+                          borderBottom: '1px solid #1f2937',
+                        }}
+                      >
+                        {bp.points?.length || 0}
+                      </td>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #1f2937' }}>
+                        <button className="btn" onClick={() => openBlueprint(bp)}>
+                          Open
+                        </button>
+                      </td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    {items.map((bp) => (
-                      <tr key={bp.name} style={{ borderBottom: '1px solid #1f2937' }}>
-                        <td>{bp.name}</td>
-                        <td className="text-end">{bp.points?.length || 0}</td>
-                        <td>
-                          <button
-                            className="btn btn-outline-primary btn-sm"
-                            onClick={() => openBlueprint(bp)}
-                          >
-                            Open
-                          </button>
-                          <td>
-                            <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(bp)}>
-                              Delete
-                            </button>
-                          </td>
-                        </td>
-                      </tr>
-                    ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <p className="fw-bold mt-3">Total user points: {totalPoints}</p>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -140,31 +149,20 @@ export default function BlueprintsPage() {
             </div>
           </div>
         </div>
+      </section>
 
-
-        <div className="col-md-6">
-          <div
-            className="card text-light"
-            style={{ backgroundColor: '#0b1220', border: '1px solid #334155' }}
-          >
-            <div className="card-body">
-              <h3 className="card-title" style={{ color: '#93c5fd' }}>
-                Current blueprint: {current?.name || '—'}
-              </h3>
-              <BlueprintCanvas
-                id="blueprint-canvas"
-                width={520}
-                height={360}
-                points={current?.points || []}
-              />
-
-              {status === 'loading' && <p>Cargando...</p>}
-              {status === 'failed' && <p className="text-danger">Error: {error}</p>}
-            </div>
-          </div>
+      <section className="card">
+        <h3 style={{ marginTop: 0 }}>Current blueprint: {current?.name || '—'}</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input
+            className="input"
+            readOnly
+            value={current?.name || ''}
+            placeholder="Nombre del blueprint actual"
+          />
+          <BlueprintCanvas id="blueprint-canvas" width={520} height={360} points={current?.points || []} />
         </div>
-
-      </div>
+      </section>
     </div>
   )
 }

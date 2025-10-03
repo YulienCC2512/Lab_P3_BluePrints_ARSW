@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 
-// ---- Canvas mock para jsdom ----
-// ---- Canvas mock para jsdom ----
+// ---- Mock del canvas para jsdom ----
+// Provee una implementación mínima de getContext para tests
 (() => {
   const noop = () => {}
   const makeStub = () => ({
@@ -38,13 +38,13 @@ import '@testing-library/jest-dom'
   const orig = HTMLCanvasElement.prototype.getContext
 
   HTMLCanvasElement.prototype.getContext = function (type) {
-    // Try to use original if it exists and works
+  // Intentar usar la implementación original si existe y funciona
     if (typeof orig === 'function') {
       try {
         const res = orig.call(this, type)
         if (res) return res
       } catch (e) {
-        // ignore and fall back to stub
+  // ignorar y usar el stub como fallback
       }
     }
     return makeStub()

@@ -1,28 +1,41 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../services/apiClient.js'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { blueprintsService } from '../../services/blueprintsService.js'
 
 export const fetchAuthors = createAsyncThunk('blueprints/fetchAuthors', async () => {
-  const data = await blueprintsService.getAll()
+  const { data } = await api.get('/blueprints')
+  // Se espera que la API devuelva un array de objetos { author, name, points }
   const authors = [...new Set(data.map((bp) => bp.author))]
   return authors
 })
 
 export const fetchByAuthor = createAsyncThunk('blueprints/fetchByAuthor', async (author) => {
-  const data = await blueprintsService.getByAuthor(author)
-  return { author, items: data }
+  try {
+    const { data } = await api.get(`/blueprints/${encodeURIComponent(author)}`)
+    return { author, items: data }
+  } catch (err) {
+    // Fallback mock data cuando no hay backend disponible
+    const mock = [
+      { author, name: 'demo-plan-1', points: [{ x: 10, y: 10 }, { x: 40, y: 60 }] },
+      { author, name: 'demo-plan-2', points: [{ x: 20, y: 30 }] },
+    ]
+    return { author, items: mock }
+  }
 })
 
 export const fetchBlueprint = createAsyncThunk(
   'blueprints/fetchBlueprint',
   async ({ author, name }) => {
-    const data = await blueprintsService.getByAuthorAndName(author, name)
+    const { data } = await api.get(
+      `/blueprints/${encodeURIComponent(author)}/${encodeURIComponent(name)}`,
+    )
     return data
   },
 )
 
 export const createBlueprint = createAsyncThunk('blueprints/createBlueprint', async (payload) => {
-  const data = await blueprintsService.create(payload)
+  const { data } = await api.post('/blueprints', payload)
   return data
 })
 
@@ -59,7 +72,6 @@ const slice = createSlice({
     current: null,
     status: 'idle',
     error: null,
-    deletes: {}
   },
   reducers: {},
   extraReducers: (builder) => {
