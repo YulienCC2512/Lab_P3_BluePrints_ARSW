@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BlueprintCanvas from '../components/BlueprintCanvas.jsx'
 import api from '../services/apiClient.js'
 
 export default function LoginPage() {
@@ -36,6 +37,7 @@ export default function LoginPage() {
           />
         </div>
       </div>
+
       {error && <p style={{ color: '#f87171' }}>{error}</p>}
       <button className="btn primary" style={{ marginTop: 12 }}>
         Ingresar
