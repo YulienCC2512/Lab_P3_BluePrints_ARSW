@@ -3,14 +3,23 @@ import api from '../../services/apiClient.js'
 
 export const fetchAuthors = createAsyncThunk('blueprints/fetchAuthors', async () => {
   const { data } = await api.get('/blueprints')
-  // Expecting API returns array of {author, name, points}
+  // Se espera que la API devuelva un array de objetos { author, name, points }
   const authors = [...new Set(data.map((bp) => bp.author))]
   return authors
 })
 
 export const fetchByAuthor = createAsyncThunk('blueprints/fetchByAuthor', async (author) => {
-  const { data } = await api.get(`/blueprints/${encodeURIComponent(author)}`)
-  return { author, items: data }
+  try {
+    const { data } = await api.get(`/blueprints/${encodeURIComponent(author)}`)
+    return { author, items: data }
+  } catch (err) {
+    // Fallback mock data cuando no hay backend disponible
+    const mock = [
+      { author, name: 'demo-plan-1', points: [{ x: 10, y: 10 }, { x: 40, y: 60 }] },
+      { author, name: 'demo-plan-2', points: [{ x: 20, y: 30 }] },
+    ]
+    return { author, items: mock }
+  }
 })
 
 export const fetchBlueprint = createAsyncThunk(
