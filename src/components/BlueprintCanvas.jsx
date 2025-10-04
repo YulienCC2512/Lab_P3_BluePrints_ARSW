@@ -5,7 +5,7 @@ export default function BlueprintCanvas({
                                           width = 520,
                                           height = 360,
                                           id = 'blueprint-canvas',
-                                          onAddPoint, // 👈 nuevo callback
+                                          onAddPoint,
                                         }) {
   const ref = useRef(null)
 
@@ -36,13 +36,13 @@ export default function BlueprintCanvas({
 
     drawGrid()
 
-  // Si no hay puntos, no hay nada más que hacer
+
     if (!points || points.length === 0) return
 
-  const delay = 150 // ms entre el dibujo de cada segmento/punto
+  const delay = 150
     const timeouts = []
 
-  // Dibujar puntos y segmentos de forma secuencial
+
     for (let i = 0; i < points.length; i++) {
       const p = points[i]
       const t = setTimeout(() => {
@@ -52,7 +52,7 @@ export default function BlueprintCanvas({
         ctx.arc(p.x, p.y, 4, 0, Math.PI * 2)
         ctx.fill()
 
-  // dibujar segmento desde el punto anterior al actual
+
         if (i > 0) {
           const prev = points[i - 1]
           ctx.strokeStyle = '#93c5fd'
@@ -66,7 +66,6 @@ export default function BlueprintCanvas({
 
       timeouts.push(t)
     }
-
 
     const finalTimeout = setTimeout(() => {
       if (points.length > 1) {
@@ -88,6 +87,14 @@ export default function BlueprintCanvas({
       timeouts.forEach((t) => clearTimeout(t))
     }
   }, [points])
+
+  function handleClick() {
+    if (!onAddPoint) return
+    const rect = ref.current.getBoundingClientRect()
+    const x = Math.round(event.clientX - rect.left)
+    const y = Math.round(event.clientY - rect.top)
+    onAddPoint({ x, y })
+  }
 
   return (
     <canvas
